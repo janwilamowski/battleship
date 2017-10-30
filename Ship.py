@@ -3,11 +3,12 @@ from constants import DIR_RIGHT, move_pos
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, board, type, position=(0, 0), direction=DIR_RIGHT):
+    def __init__(self, board, type, position=(0, 0), direction=DIR_RIGHT, is_mine=True):
         pygame.sprite.Sprite.__init__(self)
         self.board = board
         self.type = type
         self.fields = []
+        self.is_mine = is_mine
 
         pos = position
         for i in range(type):
@@ -22,12 +23,11 @@ class Ship(pygame.sprite.Sprite):
 
     def show(self, field):
         if field in self.fields:
-            print("hit {ship} at {pos}".format(ship=self, pos=field))
+            owner = self.is_mine and "my" or "enemy"
+            print("hit {owner} {ship} at {pos}".format(owner=owner, ship=self, pos=field))
             self.discovered = all(f.visible for f in self.fields)
             if (self.discovered):
-                print("sunk {ship}".format(ship=self))
-                for field in self.fields: # TODO: use event
-                    field.smoke = False
+                print("sunk {owner} {ship}".format(owner=owner, ship=self))
         else:
             print("miss")
 

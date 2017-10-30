@@ -5,7 +5,7 @@ from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, FIELD_SIZE, move_po
 
 
 class Board():
-    def __init__(self, width, height, screen, position=(0, 0), visible=False):
+    def __init__(self, width, height, screen, position=(0, 0)):
         self.height = height
         self.heightPx = height * FIELD_SIZE
         self.width = width
@@ -14,14 +14,14 @@ class Board():
         self.position = position
 
         # TODO: use NumPy array instead of nested lists?
-        self.grid = dict([((x, y), Field(screen, (x, y), visible))
+        self.grid = dict([((x, y), Field(screen, (x, y)))
                 for x in range(width) for y in range(height)])
 
     def uncover(self, position):
-        self.grid[position].show()
+        return self.grid[position].show()
 
     def uncoverPixels(self, position):
-        self.grid[(position[0]/FIELD_SIZE, position[1]/FIELD_SIZE)].show()
+        return self.grid[(position[0]/FIELD_SIZE, position[1]/FIELD_SIZE)].show()
 
     def uncover_all(self):
         for field in self.grid.values():
@@ -53,7 +53,6 @@ class Board():
             if pos not in self.grid:
                 print("field {f} isn't in this board".format(f=pos))
                 continue
-            field.smoke = True
             self[pos].ship = ship
             rect = pygame.Rect(offset, 0, FIELD_SIZE, FIELD_SIZE)
             surface = pygame.Surface(rect.size).convert()
@@ -62,16 +61,15 @@ class Board():
             offset += FIELD_SIZE
 
     def shoot_random(self):
-        targets = [pos for pos in self.grid.keys() if self[pos].visible]
+        targets = [pos for pos in self.grid.keys() if not self[pos].visible]
         # TODO: exclude fields around known ships
         # TODO: try around partial hits first
         target = self[random.choice(targets)]
+        target.visible = True
         if target.ship is not None:
-            # target.smoke = False # TODO: should be the other way around
             target.ship.show(target)
-            print("hit " + str(target.ship) + ", " + str(target.ship.discovered))
-        else:
-            target.visible = False
+            return True
+        return False
 
 
     def get_neighbor(self, position, direction):
