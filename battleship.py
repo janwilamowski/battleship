@@ -27,6 +27,8 @@ def run_game():
     animation_running = False
 
     pygame.init()
+    logo = pygame.image.load('logo.png')
+    pygame.display.set_icon(logo)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption("BATTLESHIPS!")
     clock = pygame.time.Clock()
