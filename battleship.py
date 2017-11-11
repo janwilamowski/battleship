@@ -14,6 +14,7 @@ import random
 from Board import Board
 from Crosshair import Crosshair
 from Ship import Ship
+from AI import AI
 from pygame.locals import *
 from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, FIELD_SIZE
 from generator import place_ships
@@ -35,6 +36,7 @@ def run_game():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption("BATTLESHIPS!")
     clock = pygame.time.Clock()
+    ai = AI()
 
     my_board = Board(BOARD_WIDTH, BOARD_HEIGHT, screen)
     crosshair = Crosshair(my_board)
@@ -57,7 +59,7 @@ def run_game():
             won = True
 
         if not players_turn:
-            if enemy_board.shoot_random():
+            if ai.shoot(enemy_board):
                 continue
             players_turn = not players_turn
 
