@@ -31,21 +31,6 @@ class Board():
         for coords, field in self.grid.iteritems():
             field.display(self.position)
 
-    # def ship_fits(self, size, position, direction):
-    #     avail_grid = [True for x in range(self.width) for y in range(self.height)]
-    #     fields = []
-    #     for i in range(size):
-    #         pass # TODO
-    #     return self.ship_fits_rec(avail_grid, size, position, direction)
-
-    # def ship_fits_rec(self, grid, size, position, direction):
-    #     if size == 1:
-    #         if grid[position]:
-    #             grid[position] = False
-    #             return true
-    #             # TODO: undo previous steps if doesn't fit or check all fields at once
-    #     return self.ship_fits_rec(self, grid, size - 1, move_pos[direction](position))
-
     def add_ship(self, ship):
         offset = 0
         for field in ship.fields:

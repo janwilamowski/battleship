@@ -2,7 +2,9 @@
 
 """ TODO:
 - let player choose ship locations
-- randomly generate computer ships
+- menu screen
+- console log of actions
+- AI Levels dumb (random), smart (around previous hits) and unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
 """
 
@@ -14,6 +16,7 @@ from Crosshair import Crosshair
 from Ship import Ship
 from pygame.locals import *
 from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, FIELD_SIZE
+from generator import place_ships
 
 
 def run_game():
@@ -36,8 +39,8 @@ def run_game():
     my_board = Board(BOARD_WIDTH, BOARD_HEIGHT, screen)
     crosshair = Crosshair(my_board)
     enemy_board = Board(BOARD_WIDTH, BOARD_HEIGHT, screen, (550, 0))
-    my_ships = generate_ships(enemy_board, shipCountBySize)
-    enemy_ships = generate_ships(my_board, shipCountBySize, False)
+    my_ships = place_ships(enemy_board, shipCountBySize)
+    enemy_ships = place_ships(my_board, shipCountBySize, False)
 
     font = pygame.font.Font(None, 36)
     textpos = pygame.Rect(50, 550, 50, 30)
@@ -93,32 +96,6 @@ def run_game():
 
         pygame.display.flip()
 
-
-def generate_ships(board, shipCountBySize, is_mine=True):
-    ships = []
-    for size in sorted(shipCountBySize.keys(), reverse=True):
-        amount = shipCountBySize[size]
-        for i in range(amount):
-            print("placing ship of size " + str(size))
-            # while True:
-            #     direction = random.randint(0, 3)
-            #     x = random.randint(0, 9)
-            #     y = random.randint(0, 9)
-                # if board.ship_fits(size, (x, y), direction):
-                #     break
-            # ships.append(Ship(board, size, (x, y), direction))
-    ships = [
-            Ship(board, 5, (0,0), DIR_RIGHT, is_mine),
-            Ship(board, 4, (2,2), DIR_DOWN, is_mine),
-            Ship(board, 3, (4,2), DIR_DOWN, is_mine),
-            Ship(board, 3, (4,6), DIR_DOWN, is_mine),
-            Ship(board, 2, (9,1), DIR_LEFT, is_mine),
-            Ship(board, 2, (7,5), DIR_RIGHT, is_mine),
-            Ship(board, 1, (2,8), DIR_DOWN, is_mine),
-            Ship(board, 1, (9,7), DIR_LEFT, is_mine),
-            Ship(board, 1, (7,8), DIR_UP, is_mine),
-            ]
-    return ships
 
 if __name__ == "__main__":
     run_game()
