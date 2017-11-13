@@ -2,10 +2,11 @@
 
 """ TODO:
 - let player choose ship locations
-- menu screen
+- menu screen (integrate with native UI?)
 - console log of actions
-- AI Levels dumb (random), smart (around previous hits) and unfair (50% chance of hit)
+- AI Level unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
+- show remaining enemy ships
 """
 
 import sys
@@ -16,7 +17,7 @@ from Crosshair import Crosshair
 from Ship import Ship
 from AI import AI
 from pygame.locals import *
-from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, FIELD_SIZE
+from constants import FIELD_SIZE
 from generator import place_ships
 
 
@@ -66,7 +67,7 @@ def run_game():
         # Limit frame speed to 50 FPS
         time_passed = clock.tick(50)
 
-        for event in pygame.event.get():
+        for event in pygame.event.get(): # TODO: suspend actions after game end
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == KEYDOWN:

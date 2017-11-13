@@ -1,9 +1,9 @@
 import pygame
-from constants import DIR_RIGHT, move_pos
+from constants import DIR, move_pos
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, board, size, position=(0, 0), direction=DIR_RIGHT, is_mine=True):
+    def __init__(self, board, size, position=(0, 0), direction=DIR.RIGHT, is_mine=True):
         pygame.sprite.Sprite.__init__(self)
         self.board = board
         self.size = size
@@ -30,6 +30,9 @@ class Ship(pygame.sprite.Sprite):
                 print("sunk {owner} {ship}".format(owner=owner, ship=self))
         else:
             print("miss")
+
+    def is_smoking(self):
+        return not self.discovered and any(f.visible for f in self.fields)
 
     def __repr__(self):
         return "Ship of size {size} in dir = {dir}, fields = {fields}".format(size=self.size, dir=self.direction, fields=self.fields)

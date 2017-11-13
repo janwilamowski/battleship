@@ -1,5 +1,5 @@
 import random
-from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, move_pos
+from constants import DIR, move_pos
 from Ship import Ship
 
 
@@ -25,15 +25,16 @@ def place_ships(board, shipCountBySize, is_mine=True):
         for i in range(amount):
             max_tries = 20 # emergency break TODO can possibly be reduced
             for i in range(max_tries):
-                rdir = random.randint(0, 1)
+                rdir = random.randint(0, 1) # TODO: also use LEFT & UP if space is available
                 max_x = board.width-size if rdir is 0 else board.width-1
                 max_y = board.height-size if rdir is 1 else board.height-1
                 free_fields = set(coords for coords in space if is_within(coords, max_x, max_y)).difference(neighbors)
                 if len(free_fields) == 0:
-                    return ships
+                    print('no space left')
+                    continue # TODO: many unneeded iterations. Try all options for rdir instead
 
                 (x, y) = random.choice(list(free_fields))
-                direction = DIR_RIGHT if rdir is 0 else DIR_DOWN # TODO: also use LEFT & UP
+                direction = DIR.RIGHT if rdir is 0 else DIR.DOWN
                 pos = (x, y)
                 fields = []
 
@@ -70,18 +71,16 @@ def pr(board, space):
 def is_within(p, max_x, max_y):
     return p[0] <= max_x and p[1] <= max_y
 
+def get_neighbors_ship(ship, board):
+    return get_neighbors(ship.fields[0].position, ship.size, ship.direction, board)
+
 def get_neighbors(pos, size, direction, board):
     h = board.height
     w = board.width
     candidates = set()
     for i in range(size):
         if i in [0, size-1]:
-            candidates.update( [
-                (pos[0]-1, pos[1]+1),
-                (pos[0]+1, pos[1]+1),
-                (pos[0]-1, pos[1]-1),
-                (pos[0]+1, pos[1]-1)
-            ] )
+            candidates.update( get_diagonal_neighbors(pos) )
         if i is 0:
             candidates.add( move_pos[get_opposite_direction(direction)](pos) )
         if i is size-1:
@@ -90,14 +89,25 @@ def get_neighbors(pos, size, direction, board):
         pos = move_pos[direction](pos)
     return set(c for c in candidates if 0 <= c[0] < w and 0 <= c[1] < h)
 
+def get_diagonal_neighbors(coords):
+    return (
+        (coords[0]-1, coords[1]+1),
+        (coords[0]+1, coords[1]+1),
+        (coords[0]-1, coords[1]-1),
+        (coords[0]+1, coords[1]-1)
+    )
+
+def get_orthogonal_neighbors(coords):
+    return tuple(move_pos[d](coords) for d in DIR)
+
 def get_vertical_directions(direction):
-    if direction in [DIR_UP, DIR_DOWN]:
-        return [DIR_LEFT, DIR_RIGHT]
+    if direction in (DIR.UP, DIR.DOWN):
+        return (DIR.LEFT, DIR.RIGHT)
     else:
-        return [DIR_UP, DIR_DOWN]
+        return (DIR.UP, DIR.DOWN)
 
 def get_opposite_direction(direction):
-    if direction is DIR_RIGHT: return DIR_LEFT
-    elif direction is DIR_LEFT: return DIR_RIGHT
-    elif direction is DIR_UP: return DIR_DOWN
-    elif direction is DIR_DOWN: return DIR_UP
+    if direction is DIR.RIGHT: return DIR.LEFT
+    elif direction is DIR.LEFT: return DIR.RIGHT
+    elif direction is DIR.UP: return DIR.DOWN
+    elif direction is DIR.DOWN: return DIR.UP

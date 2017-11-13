@@ -1,7 +1,7 @@
 import pygame
 import random
 from Field import Field
-from constants import DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT, FIELD_SIZE, move_pos
+from constants import FIELD_SIZE
 
 
 class Board():
@@ -13,7 +13,6 @@ class Board():
         self.screen = screen
         self.position = position
 
-        # TODO: use NumPy array instead of nested lists?
         self.grid = dict([((x, y), Field(screen, (x, y)))
                 for x in range(width) for y in range(height)])
 
@@ -42,35 +41,25 @@ class Board():
             rect = pygame.Rect(offset, 0, FIELD_SIZE, FIELD_SIZE)
             surface = pygame.Surface(rect.size).convert()
             surface.blit(ship.image, (0, 0), rect)
-            self[pos].image = pygame.transform.rotate(surface, ship.direction * 90)
+            self[pos].image = pygame.transform.rotate(surface, ship.direction.value)
             offset += FIELD_SIZE
 
     def shoot_random(self):
         targets = [pos for pos in self.grid.keys() if not self[pos].visible]
-        # TODO: exclude fields around known ships
-        # TODO: try around partial hits first
-        target = self[random.choice(targets)]
+        return self.shoot(random.choice(targets))
+
+    def shoot(self, coords):
+        """ Uncovers the field at the given coordinates.
+            Returns True if a ship was hit and False otherwise. Updates the ship if it was hit.
+        """
+        if not coords in self.grid: return False
+
+        target = self[coords]
         target.visible = True
         if target.ship is not None:
             target.ship.show(target)
             return True
         return False
-
-
-    def get_neighbor(self, position, direction):
-        if direction == DIR_UP:
-            neighbor_pos = (position[0], position[1] - 1)
-        elif direction == DIR_DOWN:
-            neighbor_pos = (position[0], position[1] + 1)
-        elif direction == DIR_RIGHT:
-            neighbor_pos = (position[0] + 1, position[1])
-        elif direction == DIR_LEFT:
-            neighbor_pos = (position[0] - 1, position[1])
-        else:
-            print("ERROR: can't move towards direction " + direction)
-        if not 0 <= neighbor_pos[0] <= self.width or not 0 <= neighbor_pos[1] <= self.height:
-            raise ValueError("requested neighbor of {pos} towards {dir} out of bounds".format(pos=position, dir=direction))
-        return neighbor_pos
 
     def __getitem__(self, key):
         return self.grid[key]
