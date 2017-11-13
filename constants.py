@@ -8,10 +8,3 @@ class DIR(Enum):
     UP = 90
     LEFT = 180
     DOWN = 270
-
-move_pos = {
-    DIR.RIGHT: lambda pos: (pos[0] + 1, pos[1]),
-    DIR.DOWN: lambda pos: (pos[0], pos[1] + 1),
-    DIR.LEFT: lambda pos: (pos[0] - 1, pos[1]),
-    DIR.UP: lambda pos: (pos[0], pos[1] - 1),
-}

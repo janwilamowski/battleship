@@ -1,6 +1,6 @@
 from enum import Enum
 import random
-from generator import get_diagonal_neighbors, get_orthogonal_neighbors, get_neighbors_ship
+from geometry import get_diagonal_neighbors, get_orthogonal_neighbors, get_neighbors_ship
 
 
 class AI_Level(Enum):

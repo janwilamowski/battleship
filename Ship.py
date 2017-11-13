@@ -1,5 +1,6 @@
 import pygame
-from constants import DIR, move_pos
+from constants import DIR
+from geometry import move_pos
 
 
 class Ship(pygame.sprite.Sprite):
