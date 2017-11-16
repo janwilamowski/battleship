@@ -1,7 +1,7 @@
 import pygame
 import random
 from Field import Field
-from constants import FIELD_SIZE
+from constants import FIELD_SIZE, BOARD_WIDTH, BOARD_HEIGHT
 
 
 class Board():
@@ -21,7 +21,7 @@ class Board():
     def uncoverPixels(self, position):
         pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
         pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
-        if 0 <= pos_x <= 9 and 0 <= pos_y <= 9:
+        if 0 <= pos_x < BOARD_WIDTH and 0 <= pos_y < BOARD_HEIGHT:
             return self.grid[(pos_x, pos_y)].show()
         else:
             return True # ignore

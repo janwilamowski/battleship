@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import K_UP, K_DOWN, K_RIGHT, K_LEFT
+from constants import FIELD_SIZE, BOARD_WIDTH, BOARD_HEIGHT
 
 
 class Crosshair(pygame.sprite.Sprite):
@@ -12,8 +13,8 @@ class Crosshair(pygame.sprite.Sprite):
             self.image = pygame.image.load('gfx/crosshair.png').convert_alpha()
 
     def display(self):
-        pos_x = 50 * self.position[0] + self.offset[0]
-        pos_y = 50 * self.position[1] + self.offset[1]
+        pos_x = FIELD_SIZE * self.position[0] + self.offset[0]
+        pos_y = FIELD_SIZE * self.position[1] + self.offset[1]
         draw_pos = self.image.get_rect().move(pos_x, pos_y)
         self.board.screen.blit(self.image, draw_pos)
 
@@ -32,9 +33,9 @@ class Crosshair(pygame.sprite.Sprite):
         self.position = (self.position[0] % self.board.width, self.position[1] % self.board.height)
 
     def moveTo(self, position):
-        pos_x = (position[0] - self.offset[0]) / 50
-        pos_y = (position[1] - self.offset[1]) / 50
-        if 0 <= pos_x <= 9 and 0 <= pos_y <= 9:
+        pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
+        pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
+        if 0 <= pos_x < BOARD_WIDTH and 0 <= pos_y < BOARD_HEIGHT:
             self.position = (pos_x, pos_y)
 
     def coords(self):
