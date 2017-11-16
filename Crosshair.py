@@ -3,15 +3,18 @@ from pygame.locals import K_UP, K_DOWN, K_RIGHT, K_LEFT
 
 
 class Crosshair(pygame.sprite.Sprite):
-    def __init__(self, board, position=(0, 0)):
+    def __init__(self, board, position=(0, 0), offset=(0, 0)):
         pygame.sprite.Sprite.__init__(self)
         self.board = board
         self.position = position
+        self.offset = offset
         if board is not None and board.screen is not None:
             self.image = pygame.image.load('gfx/crosshair.png').convert_alpha()
 
     def display(self):
-        draw_pos = self.image.get_rect().move(50 * self.position[0], 50 * self.position[1])
+        pos_x = 50 * self.position[0] + self.offset[0]
+        pos_y = 50 * self.position[1] + self.offset[1]
+        draw_pos = self.image.get_rect().move(pos_x, pos_y)
         self.board.screen.blit(self.image, draw_pos)
 
     def move(self, direction):
@@ -29,9 +32,14 @@ class Crosshair(pygame.sprite.Sprite):
         self.position = (self.position[0] % self.board.width, self.position[1] % self.board.height)
 
     def moveTo(self, position):
-        coords = (position[0] / 50, position[1] / 50)
-        if coords[0] <= 9 and coords[1] <= 9:
-            self.position = coords
+        pos_x = (position[0] - self.offset[0]) / 50
+        pos_y = (position[1] - self.offset[1]) / 50
+        if 0 <= pos_x <= 9 and 0 <= pos_y <= 9:
+            self.position = (pos_x, pos_y)
+
+    def coords(self):
+        letters = 'ABCDEFGHIJ'
+        return '{x}{y}'.format(x=letters[self.position[0]], y=self.position[1]+1)
 
     def __repr__(self):
         return "Crosshair at " + str(self.position)

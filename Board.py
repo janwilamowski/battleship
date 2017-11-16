@@ -5,30 +5,38 @@ from constants import FIELD_SIZE
 
 
 class Board():
-    def __init__(self, width, height, screen, position=(0, 0)):
+    def __init__(self, width, height, screen, offset=(0, 0)):
         self.height = height
         self.heightPx = height * FIELD_SIZE
         self.width = width
         self.widthPx = width * FIELD_SIZE
         self.screen = screen
-        self.position = position
+        self.offset = offset
 
-        self.grid = dict([((x, y), Field(screen, (x, y)))
-                for x in range(width) for y in range(height)])
+        self.reset_fields()
 
     def uncover(self, position):
         return self.grid[position].show()
 
     def uncoverPixels(self, position):
-        return self.grid[(position[0]/FIELD_SIZE, position[1]/FIELD_SIZE)].show()
+        pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
+        pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
+        if 0 <= pos_x <= 9 and 0 <= pos_y <= 9:
+            return self.grid[(pos_x, pos_y)].show()
+        else:
+            return True # ignore
 
     def uncover_all(self):
         for field in self.grid.values():
             field.show()
 
+    def reset_fields(self):
+        self.grid = dict([((x, y), Field(self.screen, (x, y)))
+                for x in range(self.width) for y in range(self.height)])
+
     def display(self):
         for coords, field in self.grid.iteritems():
-            field.display(self.position)
+            field.display(self.offset)
 
     def add_ship(self, ship):
         offset = 0

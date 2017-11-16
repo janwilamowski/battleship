@@ -25,7 +25,7 @@ def place_ships(board, shipCountBySize, is_mine=True):
         amount = shipCountBySize[size]
         for i in range(amount):
             max_tries = 20 # emergency break TODO can possibly be reduced
-            for i in range(max_tries):
+            for j in range(max_tries):
                 rdir = random.randint(0, 1) # TODO: also use LEFT & UP if space is available
                 max_x = board.width-size if rdir is 0 else board.width-1
                 max_y = board.height-size if rdir is 1 else board.height-1
@@ -39,7 +39,7 @@ def place_ships(board, shipCountBySize, is_mine=True):
                 pos = (x, y)
                 fields = []
 
-                for i in range(size):
+                for k in range(size):
                     if not pos in space or pos in neighbors: break
                     fields.append(board[pos])
                     space.remove(pos)
