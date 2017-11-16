@@ -2,6 +2,7 @@ from enum import Enum
 
 FIELD_SIZE = 50
 BG_COLOR = 150, 150, 80
+TEXT_COLOR = 10, 10, 10
 BOARD_WIDTH, BOARD_HEIGHT = 10, 10
 
 class DIR(Enum):

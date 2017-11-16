@@ -18,7 +18,7 @@ from Ship import Ship
 from AI import AI
 from AI import AI_Level
 from pygame.locals import *
-from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT
+from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT, TEXT_COLOR
 from generator import place_ships
 from pgu import gui
 
@@ -36,6 +36,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.ai = AI()
 
+        # GUI
         self.app = gui.App()
         self.app.connect(gui.QUIT, self.app.quit, None)
         container = gui.Container(align=-1, valign=-1)
@@ -59,8 +60,8 @@ class Game:
 
         font = pygame.font.Font(None, 36)
         self.textpos = pygame.Rect(50, 550, 50, 30)
-        self.won_text = font.render("YOU WON!", 1, (10, 10, 10))
-        self.lost_text = font.render("YOU LOST!", 1, (10, 10, 10))
+        self.won_text = font.render("YOU WON!", 1, TEXT_COLOR)
+        self.lost_text = font.render("YOU LOST!", 1, TEXT_COLOR)
         self.font = font
         self.end_pos = pygame.Rect(50, 600, 100, 30)
 
@@ -145,7 +146,7 @@ class Game:
                 elif event.type == MOUSEMOTION:
                     self.crosshair.moveTo(event.pos)
 
-                coords = self.font.render(self.crosshair.coords(), 1, (10, 10, 10))
+                coords = self.font.render(self.crosshair.coords(), 1, TEXT_COLOR)
 
             # Redraw the background
             self.screen.fill(BG_COLOR)
