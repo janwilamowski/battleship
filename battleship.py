@@ -41,8 +41,8 @@ class Game:
         self.app.connect(gui.QUIT, self.app.quit, None)
         container = gui.Container(align=-1, valign=-1)
         menus = gui.Menus([
-            ('File/New', self.init, True),
-            ('File/Quit', self.quit, None),
+            ('Game/New', self.init, True),
+            ('Game/Quit', self.quit, None),
             ('AI Level/Dumb', self.set_ai, AI_Level.dumb),
             ('AI Level/Smart', self.set_ai, AI_Level.smart),
             ('Help/Help', self.open_help, None),
@@ -63,7 +63,7 @@ class Game:
         self.crosshair = Crosshair(self.my_board, (0, 0), menu_offset)
         self.enemy_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, (550, 25))
 
-        self.textpos = pygame.Rect(50, 550, 50, 30)
+        self.textpos = pygame.Rect(10, 545, 50, 30)
 
     def init(self, log):
         shipCountBySize = {5: 1, 4: 1, 3: 2, 2: 2, 1: 3}
@@ -73,6 +73,7 @@ class Game:
         self.enemy_board.reset_fields()
         self.my_ships = place_ships(self.enemy_board, shipCountBySize)
         self.enemy_ships = place_ships(self.my_board, shipCountBySize, False)
+        self.remaining_ships = shipCountBySize
         if log:
             self.doc.widgets = []
             self.log("Welcome to Battleships!")
@@ -109,15 +110,19 @@ class Game:
         self.doc.layout._widgets.reverse()
         self.log_box.set_vertical_scroll(0)
 
-    def log_shot(self, is_mine, hit, sunk):
-        who = 'You have' if is_mine else 'Your opponent has'
-        action = 'sunk' if sunk else 'hit'
-        whose = 'the enemy' if is_mine else 'your'
-        color = MY_COLOR if is_mine else ENEMY_COLOR
-        if hit:
-            self.log('{who} {action} {whose} ship!'.format(who=who, action=action, whose=whose), color)
-        else:
+    def log_shot(self, ship):
+        who = 'You have' if self.players_turn else 'Your opponent has'
+        color = MY_COLOR if self.players_turn else ENEMY_COLOR
+        if ship is None:
             self.log('{who} missed'.format(who=who), color)
+            return
+
+        action = 'sunk' if ship.discovered else 'hit'
+        whose = 'your' if ship.is_mine else 'the enemy'
+        self.log('{who} {action} {whose} ship!'.format(who=who, action=action, whose=whose), color)
+
+        if ship.discovered and not ship.is_mine:
+            self.remaining_ships[ship.size] -= 1
 
     def check_game_end(self):
         if self.won is not None: return
@@ -129,6 +134,20 @@ class Game:
             self.won = True
             self.log('YOU WON!', MY_COLOR)
         # TODO: popup message?
+
+    def show_remaining_ships(self):
+        offset = 60
+        for size, count in self.remaining_ships.items():
+            text_pos = pygame.Rect(offset, 545, 50, 30)
+            amount = self.font.render('{c}x'.format(c=count), 1, TEXT_COLOR)
+            self.screen.blit(amount, text_pos)
+            offset += 30
+
+            ship_size = size * FIELD_SIZE
+            ship_pos = pygame.Rect(offset, 535, ship_size, FIELD_SIZE)
+            image = pygame.image.load('gfx/ship{size}.bmp'.format(size=size)).convert_alpha()
+            self.screen.blit(image, ship_pos)
+            offset += ship_size + 20
 
     def show_coords(self, coords):
         self.screen.blit(coords, self.textpos)
@@ -144,9 +163,9 @@ class Game:
             time_passed = self.clock.tick(50)
 
             if self.won is None and not self.players_turn:
-                hit, sunk = self.ai.shoot(self.enemy_board)
-                self.log_shot(False, hit, sunk)
-                if hit:
+                hit, ship = self.ai.shoot(self.enemy_board)
+                self.log_shot(ship)
+                if ship is not None:
                     self.check_game_end()
                     continue
                 self.switch_turns()
@@ -166,20 +185,20 @@ class Game:
                     elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                         self.crosshair.move(event.key)
                     elif event.key == K_RETURN and self.won is None:
-                        hit, sunk = self.my_board.shoot(self.crosshair.position)
+                        hit, ship = self.my_board.shoot(self.crosshair.position)
                         if hit is None:
                             break
-                        self.log_shot(True, hit, sunk)
+                        self.log_shot(ship)
                         self.check_game_end()
                         self.switch_turns(hit)
                     elif event.key == K_SPACE:
                         self.my_board.uncover_all()
                         self.check_game_end()
-                elif event.type == MOUSEBUTTONDOWN and event.button == 1:  # left click
-                    hit, sunk = self.my_board.uncoverPixels(event.pos)
+                elif event.type == MOUSEBUTTONDOWN and event.button == 1 and self.won is None:  # left click
+                    hit, ship = self.my_board.uncoverPixels(event.pos)
                     if hit is None:
                         break
-                    self.log_shot(True, hit, sunk)
+                    self.log_shot(ship)
                     self.check_game_end()
                     self.switch_turns(hit)
                 elif event.type == MOUSEMOTION:
@@ -192,6 +211,7 @@ class Game:
             self.my_board.display()
             self.enemy_board.display()
             self.crosshair.display()
+            self.show_remaining_ships()
             self.show_coords(coords)
 
             self.app.paint()

@@ -66,8 +66,8 @@ class Board():
         target.visible = True
         if target.ship is not None:
             sunk = target.ship.show(target)
-            return True, sunk
-        return False, False
+            return True, target.ship
+        return False, None
 
     def __getitem__(self, key):
         return self.grid[key]
