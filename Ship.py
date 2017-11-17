@@ -29,8 +29,10 @@ class Ship(pygame.sprite.Sprite):
             self.discovered = all(f.visible for f in self.fields)
             if (self.discovered):
                 print("sunk {owner} {ship}".format(owner=owner, ship=self))
+                return True
         else:
             print("miss")
+            return False
 
     def is_smoking(self):
         return not self.discovered and any(f.visible for f in self.fields)

@@ -16,15 +16,15 @@ class Board():
         self.reset_fields()
 
     def uncover(self, position):
-        return self.grid[position].show()
+        return self.shoot(position)
 
     def uncoverPixels(self, position):
         pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
         pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
         if 0 <= pos_x < BOARD_WIDTH and 0 <= pos_y < BOARD_HEIGHT:
-            return self.grid[(pos_x, pos_y)].show()
+            return self.shoot((pos_x, pos_y))
         else:
-            return True # ignore
+            return None, None # ignore
 
     def uncover_all(self):
         for field in self.grid.values():
@@ -60,14 +60,14 @@ class Board():
         """ Uncovers the field at the given coordinates.
             Returns True if a ship was hit and False otherwise. Updates the ship if it was hit.
         """
-        if not coords in self.grid: return False
+        if not coords in self.grid or self.grid[coords].visible: return None, None
 
         target = self[coords]
         target.visible = True
         if target.ship is not None:
-            target.ship.show(target)
-            return True
-        return False
+            sunk = target.ship.show(target)
+            return True, sunk
+        return False, False
 
     def __getitem__(self, key):
         return self.grid[key]

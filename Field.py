@@ -20,7 +20,7 @@ class Field(pygame.sprite.Sprite):
     def show(self):
         """ Uncovers this field and returns true if a ship was hit """
         if self.visible:
-            return True
+            return None
         self.visible = True
         if self.ship is None:
             return False
