@@ -120,6 +120,8 @@ class Game:
             self.log('{who} missed'.format(who=who), color)
 
     def check_game_end(self):
+        if self.won is not None: return
+
         if all(ship.discovered for ship in self.my_ships):
             self.won = False
             self.log('YOU LOST!', ENEMY_COLOR)
@@ -141,7 +143,7 @@ class Game:
             # Limit frame speed to 50 FPS
             time_passed = self.clock.tick(50)
 
-            if not self.players_turn:
+            if self.won is None and not self.players_turn:
                 hit, sunk = self.ai.shoot(self.enemy_board)
                 self.log_shot(False, hit, sunk)
                 if hit:
@@ -151,7 +153,7 @@ class Game:
 
             menu_active = any(menu['widget'].pcls for menu in self.menus._rows[0])
 
-            for event in pygame.event.get(): # TODO: suspend actions after game end
+            for event in pygame.event.get():
                 if menu_active or self.is_gui_click(event):
                     # pass it on to pgu
                     self.app.event(event)
@@ -163,7 +165,7 @@ class Game:
                         sys.exit()
                     elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                         self.crosshair.move(event.key)
-                    elif event.key == K_RETURN:
+                    elif event.key == K_RETURN and self.won is None:
                         hit, sunk = self.my_board.shoot(self.crosshair.position)
                         if hit is None:
                             break
