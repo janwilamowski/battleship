@@ -9,7 +9,6 @@
 
 import sys
 import pygame
-import random
 from Board import Board
 from Crosshair import Crosshair
 from Ship import Ship
@@ -24,7 +23,6 @@ from gui import Gui
 class Game:
 
     def __init__(self):
-        random.seed()
         pygame.init()
         logo = pygame.image.load('logo.png')
         pygame.display.set_icon(logo)
@@ -41,6 +39,10 @@ class Game:
         self.enemy_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, (550, 25))
 
         self.textpos = pygame.Rect(10, 545, 50, 30)
+        self.ship_images = {}
+        for size in range(1, 6):
+            image = pygame.image.load('gfx/ship{size}.bmp'.format(size=size)).convert_alpha()
+            self.ship_images[size] = image
 
     def init(self, log):
         shipCountBySize = {5: 1, 4: 1, 3: 2, 2: 2, 1: 3}
@@ -100,7 +102,7 @@ class Game:
 
             ship_size = size * FIELD_SIZE
             ship_pos = pygame.Rect(offset, 535, ship_size, FIELD_SIZE)
-            image = pygame.image.load('gfx/ship{size}.bmp'.format(size=size)).convert_alpha()
+            image = self.ship_images[size]
             self.screen.blit(image, ship_pos)
             offset += ship_size + 20
 

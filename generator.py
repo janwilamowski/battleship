@@ -10,11 +10,6 @@ def place_ships(board, shipCountBySize, is_mine=True):
     pick one randomly instead of brute forcing your way to a valid solution
     but this might not be necessary if the provided board space is big enough for all the ships
     """
-    ship_area = 3 * sum(a*b for (a, b) in shipCountBySize.items()) + 6 * sum(shipCountBySize.values())
-    board_area = board.width * board.height
-    if ship_area > board_area:
-        print('Warning: may not be able to place all ships')
-
     random.seed()
     ships = []
     space = set(board.grid.keys())
