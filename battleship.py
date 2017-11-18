@@ -4,7 +4,6 @@
 - let player choose ship locations
 - AI Level unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
-- show remaining enemy ships
 - use gray water for undiscovered own ships
 """
 
@@ -15,11 +14,11 @@ from Board import Board
 from Crosshair import Crosshair
 from Ship import Ship
 from AI import AI
-from AI import AI_Level
 from pygame.locals import *
-from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT, TEXT_COLOR, MY_COLOR, ENEMY_COLOR
+from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT, TEXT_COLOR, MY_COLOR, \
+    ENEMY_COLOR, SCREEN_WIDTH, SCREEN_HEIGHT
 from generator import place_ships
-from pgu import gui
+from gui import Gui
 
 
 class Game:
@@ -29,36 +28,14 @@ class Game:
         pygame.init()
         logo = pygame.image.load('logo.png')
         pygame.display.set_icon(logo)
-        SCREEN_WIDTH, SCREEN_HEIGHT = BOARD_WIDTH * FIELD_SIZE * 2 + 50, BOARD_HEIGHT * FIELD_SIZE + 200
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
         pygame.display.set_caption("BATTLESHIPS!")
         self.clock = pygame.time.Clock()
         self.ai = AI()
-
-        # GUI
+        self.gui = Gui(self.init, self.set_ai)
         self.font = pygame.font.Font(None, 36)
-        self.app = gui.App()
-        self.app.connect(gui.QUIT, self.app.quit, None)
-        container = gui.Container(align=-1, valign=-1)
-        menus = gui.Menus([
-            ('Game/New', self.init, True),
-            ('Game/Quit', self.quit, None),
-            ('AI Level/Dumb', self.set_ai, AI_Level.dumb),
-            ('AI Level/Smart', self.set_ai, AI_Level.smart),
-            ('Help/Help', self.open_help, None),
-            ('Help/About', self.open_about, None),
-            ])
-        menus.rect.w, menus.rect.h = menus.resize()
-        self.doc = gui.Document(width=0, height=0) # TODO: vertical?
-        self.log_box = gui.ScrollArea(self.doc, SCREEN_WIDTH, 100, hscrollbar=False)
-        self.log("Welcome to Battleships!")
-        container.add(menus, 0, 0)
-        container.add(self.log_box, 0, SCREEN_HEIGHT-100)
-        self.menus = menus
-        self.gui = (menus, self.log_box)
-        self.app.init(container)
 
-        menu_offset = (0, menus.rect.h)
+        menu_offset = (0, self.gui.menus.rect.h)
         self.my_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, menu_offset)
         self.crosshair = Crosshair(self.my_board, (0, 0), menu_offset)
         self.enemy_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, (550, 25))
@@ -75,22 +52,12 @@ class Game:
         self.enemy_ships = place_ships(self.my_board, shipCountBySize, False)
         self.remaining_ships = shipCountBySize
         if log:
-            self.doc.widgets = []
-            self.log("Welcome to Battleships!")
-
-    def quit(self, app):
-        self.app.quit()
-        sys.exit()
+            self.gui.clear_log()
+            self.gui.log("Welcome to Battleships!")
 
     def set_ai(self, level):
-        self.log(level)
         self.ai.strength = level
-
-    def open_help(self, args):
-        self.log('help') # TODO
-
-    def open_about(self, args):
-        self.log('about') # TODO
+        self.gui.log('AI level set to {l}'.format(l=level.name))
 
     def switch_turns(self, value=None):
         if value is None:
@@ -98,28 +65,16 @@ class Game:
         else:
             self.players_turn = value
 
-    def is_gui_click(self, event):
-        """ Scrolling is also clicking """
-        return event.type == MOUSEBUTTONDOWN and any(gui_el.rect.collidepoint(event.pos) for gui_el in self.gui)
-
-    def log(self, text, color=TEXT_COLOR):
-        # insert on top to avoid scrolling problems
-        self.doc.layout._widgets.reverse()
-        self.doc.block(align=-1)
-        self.doc.add(gui.Label(text, color=color))
-        self.doc.layout._widgets.reverse()
-        self.log_box.set_vertical_scroll(0)
-
     def log_shot(self, ship):
         who = 'You have' if self.players_turn else 'Your opponent has'
         color = MY_COLOR if self.players_turn else ENEMY_COLOR
         if ship is None:
-            self.log('{who} missed'.format(who=who), color)
+            self.gui.log('{who} missed'.format(who=who), color)
             return
 
         action = 'sunk' if ship.discovered else 'hit'
         whose = 'your' if ship.is_mine else 'the enemy'
-        self.log('{who} {action} {whose} ship!'.format(who=who, action=action, whose=whose), color)
+        self.gui.log('{who} {action} {whose} ship!'.format(who=who, action=action, whose=whose), color)
 
         if ship.discovered and not ship.is_mine:
             self.remaining_ships[ship.size] -= 1
@@ -129,10 +84,10 @@ class Game:
 
         if all(ship.discovered for ship in self.my_ships):
             self.won = False
-            self.log('YOU LOST!', ENEMY_COLOR)
+            self.gui.log('YOU LOST!', ENEMY_COLOR)
         elif all(ship.discovered for ship in self.enemy_ships):
             self.won = True
-            self.log('YOU WON!', MY_COLOR)
+            self.gui.log('YOU WON!', MY_COLOR)
         # TODO: popup message?
 
     def show_remaining_ships(self):
@@ -155,8 +110,6 @@ class Game:
     def run(self):
         self.init(False)
 
-        menu_active = False
-
         # The main game loop
         while True:
             # Limit frame speed to 50 FPS
@@ -170,12 +123,10 @@ class Game:
                     continue
                 self.switch_turns()
 
-            menu_active = any(menu['widget'].pcls for menu in self.menus._rows[0])
-
             for event in pygame.event.get():
-                if menu_active or self.is_gui_click(event):
-                    # pass it on to pgu
-                    self.app.event(event)
+                if self.gui.is_active() or self.gui.is_gui_click(event):
+                    # pass it on to gui
+                    self.gui.handle(event)
                 elif event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == KEYDOWN:
@@ -214,7 +165,7 @@ class Game:
             self.show_remaining_ships()
             self.show_coords(coords)
 
-            self.app.paint()
+            self.gui.paint()
             pygame.display.flip()
 
 
