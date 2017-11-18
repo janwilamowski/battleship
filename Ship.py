@@ -19,7 +19,8 @@ class Ship(pygame.sprite.Sprite):
         self.direction = direction
         self.discovered = False
         if board is not None and board.screen is not None:
-            self.image = pygame.image.load('gfx/ship{size}.bmp'.format(size=size)).convert_alpha()
+            gray = '-gray' if is_mine else ''
+            self.image = pygame.image.load('gfx/ship{size}{gray}.bmp'.format(size=size, gray=gray)).convert_alpha()
             self.board.add_ship(self)
 
     def show(self, field):

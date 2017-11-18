@@ -4,7 +4,6 @@
 - let player choose ship locations
 - AI Level unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
-- use gray water for undiscovered own ships
 """
 
 import sys
