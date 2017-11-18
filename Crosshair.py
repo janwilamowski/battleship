@@ -40,7 +40,7 @@ class Crosshair(pygame.sprite.Sprite):
 
     def coords(self):
         letters = 'ABCDEFGHIJ'
-        return '{x}{y}'.format(x=letters[self.position[0]], y=self.position[1]+1)
+        return '{y}{x}'.format(y=letters[self.position[1]], x=self.position[0]+1)
 
     def __repr__(self):
         return "Crosshair at " + str(self.position)

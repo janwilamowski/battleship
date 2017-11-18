@@ -22,5 +22,18 @@ class CrosshairTest(unittest.TestCase):
         crosshair.move(K_LEFT)
         assert (3, 4) == crosshair.position
 
+    def test_coords(self):
+        board = Board(2, 2, None)
+        crosshair = Crosshair(board)
+        assert 'A1' == crosshair.coords()
+        crosshair.move(K_RIGHT)
+        assert 'A2' == crosshair.coords()
+        crosshair.move(K_DOWN)
+        assert 'B2' == crosshair.coords()
+        crosshair.move(K_LEFT)
+        assert 'B1' == crosshair.coords()
+        crosshair.move(K_UP)
+        assert 'A1' == crosshair.coords()
+
 if __name__ == "__main__":
     unittest.main()
