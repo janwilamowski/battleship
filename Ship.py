@@ -1,6 +1,7 @@
 import pygame
 from constants import DIR
 from geometry import move_pos
+from gui import load_image
 
 
 class Ship(pygame.sprite.Sprite):
@@ -20,19 +21,16 @@ class Ship(pygame.sprite.Sprite):
         self.discovered = False
         if board is not None and board.screen is not None:
             gray = '-gray' if is_mine else ''
-            self.image = pygame.image.load('gfx/ship{size}{gray}.bmp'.format(size=size, gray=gray)).convert_alpha()
+            self.image = load_image('ship{size}{gray}.bmp'.format(size=size, gray=gray), 'gfx')
             self.board.add_ship(self)
 
     def show(self, field):
         if field in self.fields:
             owner = self.is_mine and "my" or "enemy"
-            print("hit {owner} {ship} at {pos}".format(owner=owner, ship=self, pos=field))
             self.discovered = all(f.visible for f in self.fields)
             if (self.discovered):
-                print("sunk {owner} {ship}".format(owner=owner, ship=self))
                 return True
         else:
-            print("miss")
             return False
 
     def is_smoking(self):

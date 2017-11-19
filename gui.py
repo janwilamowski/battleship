@@ -1,8 +1,15 @@
+import os
 import sys
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TEXT_COLOR
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TEXT_COLOR, BASE_DIR
 from AI import AI_Level
+import pygame
 from pygame.locals import MOUSEBUTTONDOWN
 from pgu import gui
+
+
+def load_image(filename, subdir=''):
+    file = os.path.join(BASE_DIR, subdir, filename)
+    return pygame.image.load(file).convert_alpha()
 
 
 class AboutDialog(gui.Dialog):

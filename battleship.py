@@ -7,6 +7,7 @@
 """
 
 import sys
+import os
 import pygame
 from Board import Board
 from Crosshair import Crosshair
@@ -14,16 +15,16 @@ from Ship import Ship
 from AI import AI
 from pygame.locals import *
 from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT, TEXT_COLOR, MY_COLOR, \
-    ENEMY_COLOR, SCREEN_WIDTH, SCREEN_HEIGHT
+    ENEMY_COLOR, SCREEN_WIDTH, SCREEN_HEIGHT, BASE_DIR
 from generator import place_ships
-from gui import Gui
+from gui import Gui, load_image
 
 
 class Game:
 
     def __init__(self):
         pygame.init()
-        logo = pygame.image.load('logo.png')
+        logo = pygame.image.load(os.path.join(BASE_DIR, 'logo.png'))
         pygame.display.set_icon(logo)
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
         pygame.display.set_caption("BATTLESHIPS!")
@@ -40,7 +41,7 @@ class Game:
         self.textpos = pygame.Rect(10, 545, 50, 30)
         self.ship_images = {}
         for size in range(1, 6):
-            image = pygame.image.load('gfx/ship{size}.bmp'.format(size=size)).convert_alpha()
+            image = load_image('ship{size}.bmp'.format(size=size), 'gfx')
             self.ship_images[size] = image
 
     def init(self, log):

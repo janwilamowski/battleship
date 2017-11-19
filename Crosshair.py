@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import K_UP, K_DOWN, K_RIGHT, K_LEFT
 from constants import FIELD_SIZE, BOARD_WIDTH, BOARD_HEIGHT
+from gui import load_image
 
 
 class Crosshair(pygame.sprite.Sprite):
@@ -10,7 +11,7 @@ class Crosshair(pygame.sprite.Sprite):
         self.position = position
         self.offset = offset
         if board is not None and board.screen is not None:
-            self.image = pygame.image.load('gfx/crosshair.png').convert_alpha()
+            self.image = load_image('crosshair.png', 'gfx')
 
     def display(self):
         pos_x = FIELD_SIZE * self.position[0] + self.offset[0]

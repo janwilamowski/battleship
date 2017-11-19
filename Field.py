@@ -1,5 +1,6 @@
 import pygame
 from constants import FIELD_SIZE
+from gui import load_image
 
 
 class Field(pygame.sprite.Sprite):
@@ -12,10 +13,10 @@ class Field(pygame.sprite.Sprite):
         self.position = position
         self.visible = False
         self.ship = ship
-        if screen is not None: # TODO: use absolute path or include base
-            self.water = pygame.image.load('gfx/water.png').convert_alpha()
-            self.smoke = pygame.image.load('gfx/smoke.png').convert_alpha()
-            self.gray = pygame.image.load('gfx/water-gray.png').convert_alpha()
+        if screen is not None:
+            self.water = load_image('water.png', 'gfx')
+            self.smoke = load_image('smoke.png', 'gfx')
+            self.gray = load_image('water-gray.png', 'gfx')
 
     def show(self):
         """ Uncovers this field and returns true if a ship was hit """

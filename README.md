@@ -23,7 +23,7 @@ Find and download the directory for your system in the [dist folder](./dist/). I
 
 - Python 2.7
 - PyGame
-- pgu (included)
+- pgu
 
 ## Licensing
 
