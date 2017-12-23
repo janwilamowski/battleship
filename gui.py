@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TEXT_COLOR, BASE_DIR
@@ -31,10 +33,11 @@ class AboutDialog(gui.Dialog):
 
 
 class Gui():
-    def __init__(self, init_cb, set_ai_cb):
+    def __init__(self, init_cb, set_ai_cb, font):
         self.app = gui.App()
         self.app.connect(gui.QUIT, self.app.quit, None)
         container = gui.Container(align=-1, valign=-1)
+        self.font = font
 
         menus = gui.Menus([
             ('Game/New', init_cb, True),
@@ -73,6 +76,21 @@ class Gui():
         self.doc.add(gui.Label(text, color=color))
         self.doc.layout._widgets.reverse()
         self.log_box.set_vertical_scroll(0)
+
+    def update_ai_menu(self, level):
+        # there might be a better way to access these
+        ai_menu = self.menus._rows[0][1]['widget']
+        dumb_label, smart_label = [r[0]['widget'].value for r in ai_menu.options._rows]
+        if level == AI_Level.dumb:
+            dumb_label.set_text(u'Dumb ✔')
+            smart_label.set_text('Smart')
+        elif level == AI_Level.smart:
+            dumb_label.set_text('Dumb')
+            smart_label.set_text(u'Smart ✔')
+        dumb_label.resize()
+        smart_label.resize()
+        dumb_label.set_font(self.font)
+        smart_label.set_font(self.font)
 
     def paint(self):
         self.app.paint()

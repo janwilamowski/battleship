@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 """ TODO:
+- bug: ships can sometimes not be placed
 - let player choose ship locations
 - AI Level unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
@@ -30,7 +31,9 @@ class Game:
         pygame.display.set_caption("BATTLESHIPS!")
         self.clock = pygame.time.Clock()
         self.ai = AI()
-        self.gui = Gui(self.init, self.set_ai)
+        menu_font = pygame.font.Font('DejaVuSans.ttf', 16) # default font can't display check mark
+        self.gui = Gui(self.init, self.set_ai, menu_font)
+        self.gui.update_ai_menu(self.ai.strength)
         self.font = pygame.font.Font(None, 36)
 
         menu_offset = (0, self.gui.menus.rect.h)
@@ -60,6 +63,7 @@ class Game:
     def set_ai(self, level):
         self.ai.strength = level
         self.gui.log('AI level set to {l}'.format(l=level.name))
+        self.gui.update_ai_menu(level)
 
     def switch_turns(self, value=None):
         if value is None:
