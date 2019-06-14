@@ -14,7 +14,7 @@ class GeneratorTest(unittest.TestCase):
         sizes = {5: 1, 4: 1, 3: 2, 2: 2, 1: 3}
         ships = place_ships(board, sizes)
         for ship in ships:
-            print ship
+            print(ship)
 
     def test_allShipsInCategoryTooLarge(self):
         board = Board(3, 3, None)
@@ -26,7 +26,7 @@ class GeneratorTest(unittest.TestCase):
         board = Board(3, 1, None)
         sizes = {3: 2}
         ships = place_ships(board, sizes)
-        print ships
+        print(ships)
         assert len(ships) == 1
 
 if __name__ == '__main__':

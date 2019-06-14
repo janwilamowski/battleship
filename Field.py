@@ -55,4 +55,4 @@ class Field(pygame.sprite.Sprite):
         self.screen.blit(img, draw_pos)
 
     def __repr__(self):
-        return "Field " + str(self.position)
+        return f'Field {self.position}'

@@ -21,20 +21,21 @@ class Ship(pygame.sprite.Sprite):
         self.discovered = False
         if board is not None and board.screen is not None:
             gray = '-gray' if is_mine else ''
-            self.image = load_image('ship{size}{gray}.bmp'.format(size=size, gray=gray), 'gfx')
+            self.image = load_image(f'ship{size}{gray}.bmp', 'gfx')
             self.board.add_ship(self)
 
+
     def show(self, field):
-        if field in self.fields:
-            owner = self.is_mine and "my" or "enemy"
-            self.discovered = all(f.visible for f in self.fields)
-            if (self.discovered):
-                return True
-        else:
+        if field not in self.fields:
             return False
+
+        self.discovered = all(f.visible for f in self.fields)
+        return self.discovered
+
 
     def is_smoking(self):
         return not self.discovered and any(f.visible for f in self.fields)
 
+
     def __repr__(self):
-        return "Ship of size {size} in dir = {dir}, fields = {fields}".format(size=self.size, dir=self.direction, fields=self.fields)
+        return f"Ship of size {self.size} in dir = {self.direction}, fields = {self.fields}"

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """ TODO:
 - bug: ships can sometimes not be placed
@@ -30,21 +30,21 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
         pygame.display.set_caption("BATTLESHIPS!")
         self.clock = pygame.time.Clock()
-        self.ai = AI()
         menu_font = pygame.font.Font('DejaVuSans.ttf', 16) # default font can't display check mark
         self.gui = Gui(self.init, self.set_ai, menu_font)
-        self.gui.update_ai_menu(self.ai.strength)
         self.font = pygame.font.Font(None, 36)
 
         menu_offset = (0, self.gui.menus.rect.h)
         self.my_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, menu_offset)
         self.crosshair = Crosshair(self.my_board, (0, 0), menu_offset)
         self.enemy_board = Board(BOARD_WIDTH, BOARD_HEIGHT, self.screen, (550, 25))
+        self.ai = AI(self.enemy_board)
+        self.gui.update_ai_menu(self.ai.strength)
 
         self.textpos = pygame.Rect(10, 545, 50, 30)
         self.ship_images = {}
         for size in range(1, 6):
-            image = load_image('ship{size}.bmp'.format(size=size), 'gfx')
+            image = load_image(f'ship{size}.bmp', 'gfx')
             self.ship_images[size] = image
 
     def init(self, log):
@@ -62,7 +62,7 @@ class Game:
 
     def set_ai(self, level):
         self.ai.strength = level
-        self.gui.log('AI level set to {l}'.format(l=level.name))
+        self.gui.log(f'AI level set to {level.name}')
         self.gui.update_ai_menu(level)
 
     def switch_turns(self, value=None):
@@ -75,12 +75,12 @@ class Game:
         who = 'You have' if self.players_turn else 'Your opponent has'
         color = MY_COLOR if self.players_turn else ENEMY_COLOR
         if ship is None:
-            self.gui.log('{who} missed'.format(who=who), color)
+            self.gui.log(f'{who} missed', color)
             return
 
         action = 'sunk' if ship.discovered else 'hit'
         whose = 'your' if ship.is_mine else 'the enemy'
-        self.gui.log('{who} {action} {whose} ship!'.format(who=who, action=action, whose=whose), color)
+        self.gui.log(f'{who} {action} {whose} ship!', color)
 
         if ship.discovered and not ship.is_mine:
             self.remaining_ships[ship.size] -= 1
@@ -100,7 +100,7 @@ class Game:
         offset = 60
         for size, count in self.remaining_ships.items():
             text_pos = pygame.Rect(offset, 545, 50, 30)
-            amount = self.font.render('{c}x'.format(c=count), 1, TEXT_COLOR)
+            amount = self.font.render(f'{count}x', 1, TEXT_COLOR)
             self.screen.blit(amount, text_pos)
             offset += 30
 
@@ -122,7 +122,7 @@ class Game:
             time_passed = self.clock.tick(50)
 
             if self.won is None and not self.players_turn:
-                hit, ship = self.ai.shoot(self.enemy_board)
+                hit, ship = self.ai.shoot()
                 self.log_shot(ship)
                 if ship is not None:
                     self.check_game_end()
@@ -151,6 +151,8 @@ class Game:
                     elif event.key == K_SPACE:
                         self.my_board.uncover_all()
                         self.check_game_end()
+                    elif event.key == K_n:
+                        self.init(True)
                 elif event.type == MOUSEBUTTONDOWN and event.button == 1 and self.won is None:  # left click
                     hit, ship = self.my_board.uncoverPixels(event.pos)
                     if hit is None:

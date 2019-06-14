@@ -1,7 +1,7 @@
 from enum import Enum
-import module_locator
+from os.path import dirname, realpath
 
-BASE_DIR = module_locator.module_path()
+BASE_DIR = realpath(dirname(__file__))
 
 BG_COLOR = 150, 150, 80
 TEXT_COLOR = 10, 10, 10

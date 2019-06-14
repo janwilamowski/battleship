@@ -19,8 +19,8 @@ class Board():
         return self.shoot(position)
 
     def uncoverPixels(self, position):
-        pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
-        pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
+        pos_x = (position[0] - self.offset[0]) // FIELD_SIZE
+        pos_y = (position[1] - self.offset[1]) // FIELD_SIZE
         if 0 <= pos_x < BOARD_WIDTH and 0 <= pos_y < BOARD_HEIGHT:
             return self.shoot((pos_x, pos_y))
         else:
@@ -35,7 +35,7 @@ class Board():
                 for x in range(self.width) for y in range(self.height)])
 
     def display(self):
-        for coords, field in self.grid.iteritems():
+        for coords, field in self.grid.items():
             field.display(self.offset)
 
     def add_ship(self, ship):
@@ -43,7 +43,7 @@ class Board():
         for field in ship.fields:
             pos = field.position
             if pos not in self.grid:
-                print("field {f} isn't in this board".format(f=pos))
+                print(f"field {pos} isn't in this board")
                 continue
             self[pos].ship = ship
             rect = pygame.Rect(offset, 0, FIELD_SIZE, FIELD_SIZE)
@@ -53,7 +53,7 @@ class Board():
             offset += FIELD_SIZE
 
     def shoot_random(self):
-        targets = [pos for pos in self.grid.keys() if not self[pos].visible]
+        targets = [pos for pos in self.grid if not self[pos].visible]
         return self.shoot(random.choice(targets))
 
     def shoot(self, coords):
@@ -64,7 +64,7 @@ class Board():
 
         target = self[coords]
         target.visible = True
-        if target.ship is not None:
+        if target.ship:
             sunk = target.ship.show(target)
             return True, target.ship
         return False, None

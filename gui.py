@@ -82,11 +82,11 @@ class Gui():
         ai_menu = self.menus._rows[0][1]['widget']
         dumb_label, smart_label = [r[0]['widget'].value for r in ai_menu.options._rows]
         if level == AI_Level.dumb:
-            dumb_label.set_text(u'Dumb ✔')
+            dumb_label.set_text('Dumb ✔')
             smart_label.set_text('Smart')
         elif level == AI_Level.smart:
             dumb_label.set_text('Dumb')
-            smart_label.set_text(u'Smart ✔')
+            smart_label.set_text('Smart ✔')
         dumb_label.resize()
         smart_label.resize()
         dumb_label.set_font(self.font)

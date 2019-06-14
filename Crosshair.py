@@ -29,13 +29,13 @@ class Crosshair(pygame.sprite.Sprite):
         elif direction == K_LEFT:
             self.position = (self.position[0] - 1, self.position[1])
         else:
-            print("ERROR: can't move towards direction " + direction)
+            print(f"ERROR: can't move towards direction {direction}")
 
         self.position = (self.position[0] % self.board.width, self.position[1] % self.board.height)
 
     def moveTo(self, position):
-        pos_x = (position[0] - self.offset[0]) / FIELD_SIZE
-        pos_y = (position[1] - self.offset[1]) / FIELD_SIZE
+        pos_x = (position[0] - self.offset[0]) // FIELD_SIZE
+        pos_y = (position[1] - self.offset[1]) // FIELD_SIZE
         if 0 <= pos_x < BOARD_WIDTH and 0 <= pos_y < BOARD_HEIGHT:
             self.position = (pos_x, pos_y)
 
@@ -44,4 +44,4 @@ class Crosshair(pygame.sprite.Sprite):
         return '{y}{x}'.format(y=letters[self.position[1]], x=self.position[0]+1)
 
     def __repr__(self):
-        return "Crosshair at " + str(self.position)
+        return 'Crosshair at {self.position}'

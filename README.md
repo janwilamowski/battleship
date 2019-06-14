@@ -14,6 +14,7 @@
 - Cursor keys/mouse: move crosshair
 - Enter/left click: fire
 - Escape: Quit
+- N: New game
 
 ## Download
 
@@ -21,7 +22,7 @@ Find and download the directory for your system in the [dist folder](./dist/). I
 
 ## Requirements
 
-- Python 2.7
+- Python 3
 - PyGame
 - pgu
 
