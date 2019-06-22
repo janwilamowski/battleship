@@ -4,7 +4,7 @@ from geometry import get_diagonal_neighbors, get_orthogonal_neighbors, get_neigh
 
 
 class AI_Level(Enum):
-    dumb, smart, unfair = [auto() for _ in range(3)]
+    dumb, smart = [auto() for _ in range(2)]
 
 
 class AI:
@@ -20,7 +20,6 @@ class AI:
         strategies = {
             AI_Level.dumb: self.shoot_random,
             AI_Level.smart: self.shoot_smart,
-            AI_Level.unfair: self.shoot_unfair,
         }
         return strategies[self.strength]()
 
@@ -55,7 +54,3 @@ class AI:
             for field in self.board.grid.values() \
             if not field.visible ).difference(ship_neighbors)
         return self.board.shoot( random.choice(list(targets)) )
-
-    def shoot_unfair(self):
-        """ Has a 50% chance of hitting something """
-        return self.shoot_random() # TODO - may not be needed
