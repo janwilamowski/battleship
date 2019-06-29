@@ -5,16 +5,20 @@
 - let player choose ship locations
 - AI Level unfair (50% chance of hit)
 - animate sinking (blink between smoke and ship)
+- pgu is annoying to use (tab breaks, enter/double click doesn't confirm)
 """
 
-import sys
+import logging
 import os
+import pickle
+import sys
+
 import pygame
+from pygame.locals import *
+
 from Board import Board
 from Crosshair import Crosshair
-from Ship import Ship
 from AI import AI
-from pygame.locals import *
 from constants import FIELD_SIZE, BG_COLOR, BOARD_WIDTH, BOARD_HEIGHT, TEXT_COLOR, MY_COLOR, \
     ENEMY_COLOR, SCREEN_WIDTH, SCREEN_HEIGHT, BASE_DIR
 from generator import place_ships
@@ -31,7 +35,7 @@ class Game:
         pygame.display.set_caption("BATTLESHIPS!")
         self.clock = pygame.time.Clock()
         menu_font = pygame.font.Font('DejaVuSans.ttf', 16) # default font can't display check mark
-        self.gui = Gui(self.init, self.set_ai, menu_font)
+        self.gui = Gui(self.init, self.save, self.load, self.set_ai, menu_font)
         self.font = pygame.font.Font(None, 36)
 
         menu_offset = (0, self.gui.menus.rect.h)
@@ -44,8 +48,7 @@ class Game:
         self.textpos = pygame.Rect(10, 545, 50, 30)
         self.ship_images = {}
         for size in range(1, 6):
-            image = load_image(f'ship{size}.bmp', 'gfx')
-            self.ship_images[size] = image
+            self.ship_images[size] = load_image(f'ship{size}.bmp', 'gfx')
 
     def init(self, log):
         shipCountBySize = {5: 1, 4: 1, 3: 2, 2: 2, 1: 3}
@@ -59,6 +62,64 @@ class Game:
         if log:
             self.gui.clear_log()
             self.gui.log("Welcome to Battleships!")
+
+    def on_load(self):
+        # renew display related properties
+        self.my_board.on_load(self.screen)
+        self.enemy_board.on_load(self.screen)
+        for size in self.ship_images:
+            self.ship_images[size] = load_image(f'ship{size}.bmp', 'gfx')
+        self.crosshair.on_load(self.my_board)
+        for ship in self.my_ships:
+            ship.on_load(self.enemy_board)
+        for ship in self.enemy_ships:
+            ship.on_load(self.my_board)
+        self.ai.board = self.enemy_board
+
+    def save(self, dialog):
+        filename = dialog.value # value defaults to current dir
+        if os.path.isdir(filename):
+            filename += 'game.sav'
+        self.gui.log('Saving ' + filename)
+        state = (
+            self.won,
+            self.players_turn,
+            self.my_board,
+            self.enemy_board,
+            self.my_ships,
+            self.enemy_ships,
+            self.remaining_ships,
+            self.crosshair,
+        )
+        try:
+            with open(filename, 'wb') as handle:
+                pickle.dump(state, handle)
+        except Exception as e:
+            logging.exception(f'Error saving {filename}')
+            self.gui.log(f'Error saving {filename}')
+
+    def load(self, dialog):
+        filename = dialog.value # value defaults to current dir
+        if os.path.isdir(filename):
+            filename += 'game.sav'
+        self.gui.log('Loading ' + filename)
+        try:
+            with open(filename, 'rb') as handle:
+                state = pickle.load(handle)
+            (
+                self.won,
+                self.players_turn,
+                self.my_board,
+                self.enemy_board,
+                self.my_ships,
+                self.enemy_ships,
+                self.remaining_ships,
+                self.crosshair,
+            ) = state
+            self.on_load()
+        except Exception as e:
+            logging.exception(f'Error loading {filename}')
+            self.gui.log(f'Error loading {filename}')
 
     def set_ai(self, level):
         self.ai.strength = level
@@ -119,7 +180,7 @@ class Game:
         # The main game loop
         while True:
             # Limit frame speed to 50 FPS
-            time_passed = self.clock.tick(50)
+            self.clock.tick(50)
 
             if self.won is None and not self.players_turn:
                 hit, ship = self.ai.shoot()
@@ -131,14 +192,24 @@ class Game:
 
             for event in pygame.event.get():
                 if self.gui.is_active() or self.gui.is_gui_click(event):
-                    # pass it on to gui
-                    self.gui.handle(event)
+                    if event.type == KEYDOWN and event.key == K_ESCAPE:
+                        for dialog in self.gui.dialogs:
+                            if dialog.is_open():
+                                dialog.close()
+                        for menu in self.gui.menus._rows[0]:
+                            if menu['widget'].pcls:
+                                menu['widget']._close(None)
+                    else:
+                        # pass it on to gui
+                        self.gui.handle(event)
                 elif event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == KEYDOWN:
                     # TODO: keyboard shortcuts & navigation for menu
                     if event.key == K_ESCAPE:
                         sys.exit()
+                    elif event.key == K_F1:
+                        self.gui.about_dlg.open()
                     elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                         self.crosshair.move(event.key)
                     elif event.key == K_RETURN and self.won is None:
@@ -153,6 +224,10 @@ class Game:
                         self.check_game_end()
                     elif event.key == K_n:
                         self.init(True)
+                    elif event.key == K_s:
+                        self.gui.save_dlg.open()
+                    elif event.key == K_l:
+                        self.gui.load_dlg.open()
                 elif event.type == MOUSEBUTTONDOWN and event.button == 1 and self.won is None:  # left click
                     hit, ship = self.my_board.uncoverPixels(event.pos)
                     if hit is None:

@@ -6,17 +6,31 @@ from gui import load_image
 class Field(pygame.sprite.Sprite):
     """ A game field """
 
-    def __init__(self, screen, position, ship=None):
-        pygame.sprite.Sprite.__init__(self)
+    water = smoke = gray = None
 
-        self.screen = screen
+    def __init__(self, screen, position):
+        super().__init__()
+
         self.position = position
         self.visible = False
-        self.ship = ship
-        if screen is not None:
-            self.water = load_image('water.png', 'gfx')
-            self.smoke = load_image('smoke.png', 'gfx')
-            self.gray = load_image('water-gray.png', 'gfx')
+        self.on_load(screen)
+        self.ship = None
+
+    def __getstate__(self):
+        return {
+            'visible': self.visible,
+            'position': self.position,
+            'ship': self.ship,
+        }
+
+    def on_load(self, screen):
+        self.screen = screen
+        if not Field.water:
+            Field.water = load_image('water.png', 'gfx')
+        if not Field.smoke:
+            Field.smoke = load_image('smoke.png', 'gfx')
+        if not Field.gray:
+            Field.gray = load_image('water-gray.png', 'gfx')
 
     def show(self):
         """ Uncovers this field and returns true if a ship was hit """
@@ -31,28 +45,37 @@ class Field(pygame.sprite.Sprite):
     def hide(self):
         self.visible = False
 
+    def set_ship(self, ship, image):
+        self.ship = ship
+        self.image = image
+
     def display(self, offset=(0, 0)):
+        img = None
         if self.ship:
             if self.ship.is_mine:
                 if self.visible:
-                    img = self.smoke
+                    img = Field.smoke
                 else:
                     img = self.image
             else: # enemy ship
                 if self.ship.discovered:
                     img = self.image
                 elif self.visible:
-                    img = self.smoke
+                    img = Field.smoke
                 else:
-                    img = self.gray
+                    img = Field.gray
         elif not self.visible:
-            img = self.gray
+            img = Field.gray
         else:
-            img = self.water
+            img = Field.water
+
+        if not img:
+            print('no image for', self)
+            return
 
         draw_pos = img.get_rect().move(FIELD_SIZE * self.position[0] + offset[0],
                                        FIELD_SIZE * self.position[1] + offset[1])
         self.screen.blit(img, draw_pos)
 
     def __repr__(self):
-        return f'Field {self.position}'
+        return f'Field {self.position} {self.visible}'

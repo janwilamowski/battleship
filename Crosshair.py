@@ -6,12 +6,20 @@ from gui import load_image
 
 class Crosshair(pygame.sprite.Sprite):
     def __init__(self, board, position=(0, 0), offset=(0, 0)):
-        pygame.sprite.Sprite.__init__(self)
-        self.board = board
+        super().__init__()
         self.position = position
         self.offset = offset
-        if board is not None and board.screen is not None:
-            self.image = load_image('crosshair.png', 'gfx')
+        self.on_load(board)
+
+    def __getstate__(self):
+        return {
+            'offset': self.offset,
+            'position': self.position,
+        }
+
+    def on_load(self, board):
+        self.board = board
+        self.image = load_image('crosshair.png', 'gfx')
 
     def display(self):
         pos_x = FIELD_SIZE * self.position[0] + self.offset[0]
@@ -44,4 +52,4 @@ class Crosshair(pygame.sprite.Sprite):
         return '{y}{x}'.format(y=letters[self.position[1]], x=self.position[0]+1)
 
     def __repr__(self):
-        return 'Crosshair at {self.position}'
+        return f'Crosshair at {self.position}'

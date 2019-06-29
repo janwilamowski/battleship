@@ -2,16 +2,30 @@
 
 import os
 import sys
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TEXT_COLOR, BASE_DIR
-from AI import AI_Level
 import pygame
 from pygame.locals import MOUSEBUTTONDOWN
 from pgu import gui
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, TEXT_COLOR, BASE_DIR
+from AI import AI_Level
 
 
 def load_image(filename, subdir=''):
+    if not pygame.display.get_init(): return
+
     file = os.path.join(BASE_DIR, subdir, filename)
     return pygame.image.load(file).convert_alpha()
+
+
+class SaveDialog(gui.FileDialog):
+    def __init__(self, callback):
+        super().__init__('Save game', 'Save')
+        self.connect(gui.CHANGE, callback, self)
+
+
+class LoadDialog(gui.FileDialog):
+    def __init__(self, callback):
+        super().__init__('Load game', 'Load')
+        self.connect(gui.CHANGE, callback, self)
 
 
 class AboutDialog(gui.Dialog):
@@ -29,22 +43,29 @@ class AboutDialog(gui.Dialog):
         doc.add(gui.Label('Graphics by Fabian Freiesleben'))
         doc.block(align=0)
         doc.add(gui.Label('License: GPLv3'))
-        gui.Dialog.__init__(self, title, doc)
+        super().__init__(title, doc)
 
 
 class Gui():
-    def __init__(self, init_cb, set_ai_cb, font):
+    def __init__(self, init_cb, save, load, set_ai_cb, font):
         self.app = gui.App()
         self.app.connect(gui.QUIT, self.app.quit, None)
         container = gui.Container(align=-1, valign=-1)
         self.font = font
 
+        self.save_dlg = SaveDialog(save)
+        self.load_dlg = LoadDialog(load)
+        self.about_dlg = AboutDialog()
+        self.dialogs = (self.save_dlg, self.load_dlg, self.about_dlg)
+
         menus = gui.Menus([
             ('Game/New', init_cb, True),
+            ('Game/Save', self.save_dlg.open, None),
+            ('Game/Load', self.load_dlg.open, None),
             ('Game/Quit', self.quit, None),
             ('AI Level/Dumb', set_ai_cb, AI_Level.dumb),
             ('AI Level/Smart', set_ai_cb, AI_Level.smart),
-            ('Help/About', self.open_about, None),
+            ('Help/About', self.about_dlg.open, None),
             ])
         menus.rect.w, menus.rect.h = menus.resize()
         self.doc = gui.Document(width=0, height=0) # TODO: vertical?
@@ -57,14 +78,9 @@ class Gui():
         self.elements = (menus, self.log_box)
         self.app.init(container)
 
-        self.about_dlg = AboutDialog()
-
     def quit(self, args):
         self.app.quit()
         sys.exit()
-
-    def open_about(self, args):
-        self.about_dlg.open()
 
     def clear_log(self):
         self.doc.widgets = []
@@ -100,7 +116,7 @@ class Gui():
 
     def is_active(self):
         """ Returns True if a menu or dialog is active (shown) and False otherwise. """
-        return self.about_dlg.is_open() or any(menu['widget'].pcls for menu in self.menus._rows[0])
+        return any(dialog.is_open() for dialog in self.dialogs) or any(menu['widget'].pcls for menu in self.menus._rows[0])
 
     def is_gui_click(self, event):
         """ Scrolling is also clicking """

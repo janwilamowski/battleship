@@ -1,5 +1,5 @@
-import pygame
 import random
+import pygame
 from Field import Field
 from constants import FIELD_SIZE, BOARD_WIDTH, BOARD_HEIGHT
 
@@ -31,25 +31,41 @@ class Board():
             field.show()
 
     def reset_fields(self):
-        self.grid = dict([((x, y), Field(self.screen, (x, y)))
-                for x in range(self.width) for y in range(self.height)])
+        self.grid = dict(((x, y), Field(self.screen, (x, y)))
+                for x in range(self.width) for y in range(self.height))
 
     def display(self):
-        for coords, field in self.grid.items():
+        for field in self.grid.values():
             field.display(self.offset)
 
+    def __getstate__(self):
+        return {
+            'width': self.width,
+            'height': self.height,
+            'heightPx': self.heightPx,
+            'widthPx': self.widthPx,
+            'grid': self.grid,
+            'offset': self.offset,
+        }
+
+    def on_load(self, screen):
+        self.screen = screen
+        for field in self.grid.values():
+            field.on_load(screen)
+
     def add_ship(self, ship):
+        if not self.screen: return
         offset = 0
         for field in ship.fields:
             pos = field.position
             if pos not in self.grid:
                 print(f"field {pos} isn't in this board")
                 continue
-            self[pos].ship = ship
             rect = pygame.Rect(offset, 0, FIELD_SIZE, FIELD_SIZE)
-            surface = pygame.Surface(rect.size).convert()
+            surface = pygame.Surface(rect.size).convert(self.screen)
             surface.blit(ship.image, (0, 0), rect)
-            self[pos].image = pygame.transform.rotate(surface, ship.direction.value)
+            img = pygame.transform.rotate(surface, ship.direction.value)
+            self[pos].set_ship(ship, img)
             offset += FIELD_SIZE
 
     def shoot_random(self):
@@ -65,7 +81,7 @@ class Board():
         target = self[coords]
         target.visible = True
         if target.ship:
-            sunk = target.ship.show(target)
+            target.ship.show(target)
             return True, target.ship
         return False, None
 

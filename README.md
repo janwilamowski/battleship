@@ -15,6 +15,8 @@
 - Enter/left click: fire
 - Escape: Quit
 - N: New game
+- L: Load game
+- S: Save game
 
 ## Download
 
