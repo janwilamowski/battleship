@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import pygame
 from pygame.locals import MOUSEBUTTONDOWN
@@ -12,8 +11,8 @@ from AI import AI_Level
 def load_image(filename, subdir=''):
     if not pygame.display.get_init(): return
 
-    file = os.path.join(BASE_DIR, subdir, filename)
-    return pygame.image.load(file).convert_alpha()
+    file = BASE_DIR.joinpath(subdir, filename)
+    return pygame.image.load(str(file)).convert_alpha()
 
 
 class SaveDialog(gui.FileDialog):

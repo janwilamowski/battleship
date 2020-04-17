@@ -9,9 +9,9 @@
 """
 
 import logging
-import os
 import pickle
 import sys
+from pathlib import Path
 
 import pygame
 from pygame.locals import *
@@ -29,7 +29,7 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        logo = pygame.image.load(os.path.join(BASE_DIR, 'logo.png'))
+        logo = pygame.image.load(str(BASE_DIR.joinpath('logo.png')))
         pygame.display.set_icon(logo)
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
         pygame.display.set_caption("BATTLESHIPS!")
@@ -77,10 +77,10 @@ class Game:
         self.ai.board = self.enemy_board
 
     def save(self, dialog):
-        filename = dialog.value # value defaults to current dir
-        if os.path.isdir(filename):
-            filename += 'game.sav'
-        self.gui.log('Saving ' + filename)
+        filename = Path(dialog.value) # value defaults to current dir
+        if filename.is_dir():
+            filename /= 'game.sav'
+        self.gui.log(f'Saving {filename}')
         state = (
             self.won,
             self.players_turn,
@@ -99,10 +99,10 @@ class Game:
             self.gui.log(f'Error saving {filename}')
 
     def load(self, dialog):
-        filename = dialog.value # value defaults to current dir
-        if os.path.isdir(filename):
-            filename += 'game.sav'
-        self.gui.log('Loading ' + filename)
+        filename = Path(dialog.value) # value defaults to current dir
+        if filename.is_dir():
+            filename /= 'game.sav'
+        self.gui.log(f'Loading {filename}')
         try:
             with open(filename, 'rb') as handle:
                 state = pickle.load(handle)
@@ -252,6 +252,9 @@ class Game:
             pygame.display.flip()
 
 
-if __name__ == "__main__":
+def main():
     game = Game()
     game.run()
+
+if __name__ == "__main__":
+    main()

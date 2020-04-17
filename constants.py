@@ -1,7 +1,7 @@
 from enum import Enum
-from os.path import dirname, realpath
+from pathlib import Path
 
-BASE_DIR = realpath(dirname(__file__))
+BASE_DIR = Path(__file__).resolve().parent
 
 BG_COLOR = 150, 150, 80
 TEXT_COLOR = 10, 10, 10
